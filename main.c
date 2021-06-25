@@ -135,13 +135,13 @@ int main(int argc, char *argv[])
     int i;
 
     if (argc < 4) {
-        fprintf(stderr, "Usage: %s <device type> <codec> <input file> \n", argv[0]);
+        fprintf(stderr, "Usage: %s <codec> <input file> \n", argv[0]);
         return -1;
     }
 
-    type = av_hwdevice_find_type_by_name(argv[1]);
+    type = av_hwdevice_find_type_by_name("drm");
     if (type == AV_HWDEVICE_TYPE_NONE) {
-        fprintf(stderr, "Device type %s is not supported.\n", argv[1]);
+        fprintf(stderr, "Device type drm is not supported.\n");
         fprintf(stderr, "Available device types:");
         while((type = av_hwdevice_iterate_types(type)) != AV_HWDEVICE_TYPE_NONE)
             fprintf(stderr, " %s", av_hwdevice_get_type_name(type));
@@ -150,8 +150,8 @@ int main(int argc, char *argv[])
     }
 
     /* open the input file */
-    if (avformat_open_input(&input_ctx, argv[3], NULL, NULL) != 0) {
-        fprintf(stderr, "Cannot open input file '%s'\n", argv[3]);
+    if (avformat_open_input(&input_ctx, argv[2], NULL, NULL) != 0) {
+        fprintf(stderr, "Cannot open input file '%s'\n", argv[2]);
         return -1;
     }
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    decoder = avcodec_find_decoder_by_name(argv[2]);
+    decoder = avcodec_find_decoder_by_name(argv[1]);
     if(!decoder) {
 	printf("decoder not found");
 	return -1;
