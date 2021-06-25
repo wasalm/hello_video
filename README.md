@@ -23,7 +23,6 @@ Please change the following in /boot/config.txt:
 		sudo apt install libdrm-dev libepoxy-dev libudev-dev
 
 ### Install ffmpeg from source
-
 At the time of writing the latest development version of ffmpeg is at https://github.com/jc-kynesim/rpi-ffmpeg/ in the branch dev/4.3.2/clean_3.
 In the home directory run:
 
@@ -34,67 +33,26 @@ In the home directory run:
 	sudo make install
 
 ### Install this library from source
-
-TODO
-
-### Disable command line on screen
-
-TODO
+Clone this repository in your home directory and run the build script
+	
+	git clone https://github.com/wasalm/hello_video
+	cd hello_video
+	build.sh
 
 ## Running
+You can run the program using the following way
 
-TODO
+	./ffmpeg-drm <codec> <input file>
 
+Here use the codec "h264_v4l2m2m" resp. "hevc"
+You can also download some example files and run the added run scripts:
 
+	cd ~
+	wget https://jell.yfish.us/media/jellyfish-3-mbps-hd-h264.mkv
+	./hello_video/ffmpeg-drm drm h264_v4l2m2m jellyfish-3-mbps-hd-h264.mkv
 
-# OLD NOTES
+	wget https://jell.yfish.us/media/jellyfish-3-mbps-hd-hevc.mkv
+	./hello_video/ffmpeg-drm drm hevc jellyfish-3-mbps-hd-hevc.mkv
 
-	sudo apt-get install autoconf
-
-Disable command line on screen:
-	sudo systemctl disable getty@tty1.service
-
--- Clone latests ffmpeg
-git clone --branch dev/4.3.2/clean_3 https://github.com/jc-kynesim/rpi-ffmpeg/
-
-	./configure --disable-mmal --enable-sand --enable-v4l2-request --enable-libdrm  --enable-libudev --enable-vout-drm
-
-(In that branch can also use pi-utils/conf-native.sh to configure)
-
-make
-
-FFmpeg with DRM output using v4l2_m2m example:
-
-	https://github.com/BayLibre/ffmpeg-drm
-		with bugfixes:
-	https://github.com/mark-kendall/ffmpeg-drm
-
-We need to update build file such that it workes with the self compiled ffmpeg version
-
-	#!/bin/bash
-	gcc -o ffmpeg-drm main.c -I/usr/include/libdrm -lz -lm -lpthread -lavcodec -lavformat -lavutil -lswresample -ldrm -ludev -L/usr/local/lib
-
-Finally we need to change run.sh:
-	
-	./ffmpeg-drm --video ./h264.FVDO_Freeway_720p.264 --codec h264_v4l2m2m --width 1920 --height 1080 --device /dev/dri/card1
-
-
--- TEST Scripts for ffmpeg
-	ffmpeg -no_cvt_hw -hwaccel drm -vcodec hevc -i jellyfish-3-mbps-hd-hevc.mkv -show_all 1 -f vout_drm -
-	ffmpeg -no_cvt_hw -vcodec h264_v4l2m2m -i jellyfish-3-mbps-hd-h264.mkv -f vout_drm -
-
-
--- Reference question: https://www.raspberrypi.org/forums/viewtopic.php?f=29&t=313322&p=1874437&hilit=wasalm#p1874127
-
-
--- interesting for later (overlays etc.)
-
-	https://github.com/dvdhrm/docs/tree/master/drm-howto
-
--- interesting to look at ffmpeg/docs/example/hw_decode.c
-	- how to use hw accels
-	- how to implement container decoding...
-
--- Or look at drm_vout.c in ffmpeg source.
-	- shows how to display it
-	- solves also tearing
+	wget https://jell.yfish.us/media/jellyfish-3-mbps-hd-hevc-10bit.mkv
+	./hello_video/ffmpeg-drm drm hevc jellyfish-3-mbps-hd-hevc-10bit.mkv
