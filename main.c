@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     enum AVHWDeviceType type;
     int i;
 
-    if (argc < 4) {
+    if (argc < 3) {
         fprintf(stderr, "Usage: %s <codec> <input file> \n", argv[0]);
         return -1;
     }
