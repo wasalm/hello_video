@@ -172,7 +172,8 @@ static int do_display(drm_display_env_t * const de, AVFrame * frame)
 
         while (drmWaitVBlank(de->drm_fd, &vbl)) {
             if (errno != EINTR) {
-                printf("drmWaitVBlank failed: %s\n", ERRSTR);
+                // This error is known, but not code breaking.
+                // printf("drmWaitVBlank failed: %s\n", ERRSTR);
                 break;
             }
         }
