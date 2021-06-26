@@ -11,6 +11,9 @@ Please change the following in /boot/config.txt:
 		dtoverlay=vc4-kms-v3d	
 - Enable v4l_request by adding
 		dtoverlay=rpivid-v4l2
+- Improve the performance of the video driver
+	gpu_mem=256
+	hdmi_enable_4kp60=1
 
 ### Install the needed libraries and tools
 
