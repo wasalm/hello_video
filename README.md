@@ -28,7 +28,7 @@ Please change the following in /boot/config.txt:
 
 - Install the following libraries
 
-		sudo apt install libdrm-dev libepoxy-dev libudev-dev
+		sudo apt install libdrm-dev libudev-dev
 
 ### Install ffmpeg from source
 At the time of writing the latest development version of ffmpeg is at https://github.com/jc-kynesim/rpi-ffmpeg/ in the branch dev/4.3.2/clean_3.
