@@ -50,17 +50,16 @@ Clone this repository in your home directory and run the build script
 ## Running
 You can run the program using the following way
 
-	./ffmpeg-drm <codec> <input file>
+	./ffmpeg-drm <input file>
 
-Here use the codec "h264_v4l2m2m" resp. "hevc"
 You can also download some example files and run the added run scripts:
 
 	cd ~
 	wget https://jell.yfish.us/media/jellyfish-3-mbps-hd-h264.mkv
-	./hello_video/ffmpeg-drm h264_v4l2m2m jellyfish-3-mbps-hd-h264.mkv
+	./hello_video/ffmpeg-drm jellyfish-3-mbps-hd-h264.mkv
 
 	wget https://jell.yfish.us/media/jellyfish-3-mbps-hd-hevc.mkv
-	./hello_video/ffmpeg-drm hevc jellyfish-3-mbps-hd-hevc.mkv
+	./hello_video/ffmpeg-drm jellyfish-3-mbps-hd-hevc.mkv
 
 	wget https://jell.yfish.us/media/jellyfish-3-mbps-hd-hevc-10bit.mkv
-	./hello_video/ffmpeg-drm hevc jellyfish-3-mbps-hd-hevc-10bit.mkv
+	./hello_video/ffmpeg-drm jellyfish-3-mbps-hd-hevc-10bit.mkv

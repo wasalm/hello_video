@@ -129,13 +129,14 @@ int main(int argc, char *argv[])
     int video_stream, ret;
     AVStream *video = NULL;
     AVCodecContext *decoder_ctx = NULL;
+    AVCodec *softwareDecoder = NULL;
     AVCodec *decoder = NULL;
     AVPacket packet;
     enum AVHWDeviceType type;
     int i;
 
-    if (argc < 3) {
-        fprintf(stderr, "Usage: %s <codec> <input file> \n", argv[0]);
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <input file> \n", argv[0]);
         return -1;
     }
 
@@ -150,7 +151,7 @@ int main(int argc, char *argv[])
     }
 
     /* open the input file */
-    if (avformat_open_input(&input_ctx, argv[2], NULL, NULL) != 0) {
+    if (avformat_open_input(&input_ctx, argv[1], NULL, NULL) != 0) {
         fprintf(stderr, "Cannot open input file '%s'\n", argv[2]);
         return -1;
     }
@@ -160,34 +161,28 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    decoder = avcodec_find_decoder_by_name(argv[1]);
-    if(!decoder) {
-	printf("decoder not found");
-	return -1;
-    }
-
     /* find the video stream information */
-    //ret = av_find_best_stream(input_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0);
-    ret = av_find_best_stream(input_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+    ret = av_find_best_stream(input_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &softwareDecoder, 0);
     if (ret < 0) {
         fprintf(stderr, "Cannot find a video stream in the input file\n");
         return -1;
     }
     video_stream = ret;
 
-    //for (i = 0;; i++) {
-    //    const AVCodecHWConfig *config = avcodec_get_hw_config(decoder, i);
-    //    if (!config) {
-    //        fprintf(stderr, "Decoder %s does not support device type %s.\n",
-    //                decoder->name, av_hwdevice_get_type_name(type));
-    //        return -1;
-    //    }
-    //    if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX &&
-    //        config->device_type == type) {
-    //        hw_pix_fmt = config->pix_fmt;
-    //        break;
-    //    }
-    //}
+    if(softwareDecoder -> id == AV_CODEC_ID_H264) {
+        decoder = avcodec_find_decoder_by_name("h264_v4l2m2m");
+    }
+
+    if(softwareDecoder -> id == AV_CODEC_ID_HEVC) {
+        decoder = avcodec_find_decoder_by_name("hevc");
+    }
+    
+    if(!decoder) {
+    printf("decoder not found");
+    return -1;
+    }
+
+    // Fix pixel format to DRM_PRIME
     hw_pix_fmt = AV_PIX_FMT_DRM_PRIME;
 
     if (!(decoder_ctx = avcodec_alloc_context3(decoder)))
