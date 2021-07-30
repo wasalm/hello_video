@@ -37,6 +37,11 @@ enum AVWriteUncodedFrameFlags {
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
+#include <time.h> 
+clock_t current_ticks, delta_ticks;
+double fps = 0;
+
+
 #define TRACE_ALL 0
 
 #define DRM_MODULE "vc4"
@@ -237,6 +242,19 @@ static int do_display(drm_display_env_t * const de, AVFrame * frame)
 
     de->ano = de->ano + 1 >= AUX_SIZE ? 0 : de->ano + 1;
 
+    
+    //Calculate FPS
+    delta_ticks = clock() - current_ticks; //the time, in ms, that took to render the scene
+    
+    if(delta_ticks > 0) {
+        fps = ((double) CLOCKS_PER_SEC) / ((double)delta_ticks);
+    }
+
+    printf("%.6f\n", fps);
+    
+
+    current_ticks = clock();
+
     return ret;
 }
 
@@ -432,7 +450,9 @@ fail_res:
 //static int drm_vout_init(struct AVFormatContext * s)
 static int drm_vout_init(drm_display_env_t * const de)
 {
-    //drm_display_env_t * const de = s->priv_data;
+    current_ticks = clock();
+
+
     int rv;
     const char * drm_module = DRM_MODULE;
 
