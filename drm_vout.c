@@ -53,6 +53,7 @@ struct drm_setup {
    uint32_t crtcId;
    int crtcIdx;
    uint32_t planeId;
+   uint32_t plane2Id;
    unsigned int out_fourcc;
    struct {
        int x, y, width, height;
@@ -91,13 +92,14 @@ typedef struct drm_display_env_s
 
 static int find_plane(
                       const int drmfd, const int crtcidx, const uint32_t format,
-                      uint32_t * const pplane_id)
+                      uint32_t * const pplane_id, int isPrimary)
 {
    drmModePlaneResPtr planes;
    drmModePlanePtr plane;
    unsigned int i;
    unsigned int j;
    int ret = 0;
+   int firstFound = 0;
 
    planes = drmModeGetPlaneResources(drmfd);
    if (!planes)
@@ -114,11 +116,13 @@ static int find_plane(
           break;
       }
 
+      //Check if correct CRTC
       if (!(plane->possible_crtcs & (1 << crtcidx))) {
          drmModeFreePlane(plane);
          continue;
       }
 
+      //Check format
       for (j = 0; j < plane->count_formats; ++j) {
          if (plane->formats[j] == format)
             break;
@@ -128,6 +132,13 @@ static int find_plane(
          drmModeFreePlane(plane);
          continue;
       }
+
+      if(isPrimary == 0 && firstFound == 0) {
+        firstFound = 1;
+        continue;
+      }
+      printf("planeId: %i", plane-> plane_id);
+
 
       *pplane_id = plane->plane_id;
       drmModeFreePlane(plane);
@@ -159,7 +170,13 @@ static int do_display(drm_display_env_t * const de, AVFrame * frame)
     int ret = 0;
 
     if (de->setup.out_fourcc != format) {
-        if (find_plane( de->drm_fd, de->setup.crtcIdx, format, &de->setup.planeId)) {
+        if (find_plane( de->drm_fd, de->setup.crtcIdx, format, &de->setup.planeId, 1)) {
+            av_frame_free(&frame);
+            printf("No plane for format: %#x\n", format);
+            return -1;
+        }
+
+        if (find_plane( de->drm_fd, de->setup.crtcIdx, format, &de->setup.plane2Id, 0)) {
             av_frame_free(&frame);
             printf("No plane for format: %#x\n", format);
             return -1;
@@ -227,11 +244,26 @@ static int do_display(drm_display_env_t * const de, AVFrame * frame)
         }
     }
 
+    //Main plane
     ret = drmModeSetPlane(de->drm_fd, de->setup.planeId, de->setup.crtcId,
                               da->fb_handle, 0,
                 de->setup.compose.x, de->setup.compose.y,
                 de->setup.compose.width,
                 de->setup.compose.height,
+                0, 0,
+                av_frame_cropped_width(frame) << 16,
+                av_frame_cropped_height(frame) << 16);
+
+    if (ret != 0) {
+        printf( "drmModeSetPlane failed: %s\n", ERRSTR);
+    }
+
+    //Secondary plane
+    ret = drmModeSetPlane(de->drm_fd, de->setup.plane2Id, de->setup.crtcId,
+                              da->fb_handle, 0,
+                de->setup.compose.x, de->setup.compose.y,
+                de->setup.compose.width/3,
+                de->setup.compose.height/3,
                 0, 0,
                 av_frame_cropped_width(frame) << 16,
                 av_frame_cropped_height(frame) << 16);
